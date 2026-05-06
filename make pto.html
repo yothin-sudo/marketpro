@@ -1,0 +1,397 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/>```react
+import React, { useState, useEffect } from 'react';
+import { ShoppingCart, Plus, ExternalLink, Search, Settings, X, Star, Store, CheckCircle, Flame, Clock, Globe, ArrowUpDown, Mail, Send } from 'lucide-react';
+
+// --- ระบบแปลภาษา (i18n Dictionary) ---
+const translations = {
+  en: {
+    heroTitle: "Best Deals & Trending Products",
+    heroDesc: "Discover daily discounts and handpicked authentic products from top global platforms.",
+    searchPlaceholder: "Search products, brands, or deals...",
+    buyNow: "Shop Now",
+    flashSale: "Flash Sale",
+    trending: "Trending",
+    language: "Language",
+    currency: "$",
+    adminPanel: "Admin Panel",
+    addLink: "Add Product Link",
+    addSuccess: "Product added successfully!",
+    prodName: "Product Name *",
+    price: "Price",
+    platform: "Platform *",
+    imgUrl: "Image URL",
+    affLink: "Affiliate Link (Important) *",
+    createPost: "+ Create Post",
+    description: "Description",
+    sortBy: "Sort by:",
+    sortDefault: "Latest",
+    sortPriceLow: "Price: Low to High",
+    sortPriceHigh: "Price: High to Low",
+    sortPopular: "Most Popular",
+    newsletterTitle: "Never Miss a Secret Deal!",
+    newsletterDesc: "Subscribe to our newsletter and get the best exclusive affiliate deals straight to your inbox.",
+    subscribe: "Subscribe",
+    subSuccess: "Thanks for subscribing!"
+  },
+  th: {
+    heroTitle: "รวมดีลลดราคา สำหรับคนฉลาดช้อป",
+    heroDesc: "คัดสรรโปรโมชั่นและสินค้าของแท้ที่ดีที่สุดจากแพลตฟอร์มชั้นนำ อัปเดตใหม่ทุกวัน",
+    searchPlaceholder: "ค้นหาสินค้า แบรนด์ หรือโปรโมชั่น...",
+    buyNow: "ดูรายละเอียดและสั่งซื้อ",
+    flashSale: "ลดด่วน",
+    trending: "กำลังมาแรง",
+    language: "ภาษา",
+    currency: "฿",
+    adminPanel: "จัดการหลังบ้าน",
+    addLink: "เพิ่มลิงก์สินค้า",
+    addSuccess: "เพิ่มสินค้าสำเร็จ!",
+    prodName: "ชื่อสินค้า *",
+    price: "ราคา",
+    platform: "แพลตฟอร์ม *",
+    imgUrl: "ลิงก์ภาพสินค้า (URL)",
+    affLink: "ลิงก์ Affiliate (สำคัญมาก) *",
+    createPost: "+ สร้างโพสต์สินค้า",
+    description: "รายละเอียดสินค้า (ดีต่อ SEO)",
+    sortBy: "จัดเรียง:",
+    sortDefault: "สินค้าใหม่ล่าสุด",
+    sortPriceLow: "ราคา: ต่ำ ไป สูง",
+    sortPriceHigh: "ราคา: สูง ไป ต่ำ",
+    sortPopular: "ยอดนิยม (คนดูเยอะ)",
+    newsletterTitle: "รับดีลลับก่อนใคร!",
+    newsletterDesc: "ลงทะเบียนรับข่าวสาร เพื่อรับโปรโมชั่นลดราคาพิเศษและโค้ดลับที่เราไม่ได้ลงในเว็บ",
+    subscribe: "รับดีลพิเศษ",
+    subSuccess: "ขอบคุณที่ติดตามข่าวสารครับ!"
+  }
+};
+
+const defaultProducts = [
+  {
+    id: "prod-001",
+    title: { en: 'Smart WiFi Security Camera 1080p', th: 'กล้องวงจรปิดไร้สาย WiFi 1080p ดูผ่านมือถือ' },
+    description: { en: '360-degree rotation, easy mobile setup, includes 32GB SD Card.', th: 'กล้องวงจรปิดหมุนได้ 360 องศา ติดตั้งง่ายผ่านมือถือ แถมเมม 32GB' },
+    price: { en: '12', th: '450' },
+    platform: 'Shopee',
+    affiliateLink: 'https://shopee.co.th/',
+    imageUrl: 'https://images.unsplash.com/photo-1557322761-4a56a0fb4fdf?auto=format&fit=crop&q=80&w=400',
+    isFlashSale: true,
+    rating: 4.8,
+    reviews: 1240
+  },
+  {
+    id: "prod-002",
+    title: { en: 'TWS Noise Cancelling Earbuds', th: 'หูฟังบลูทูธไร้สาย TWS ตัดเสียงรบกวน' },
+    description: { en: 'Long battery life, deep bass, active noise cancellation.', th: 'หูฟังไร้สายแบตอึดทนทาน เสียงเบสแน่น พร้อมระบบตัดเสียงรบกวนอัจฉริยะ (ANC)' },
+    price: { en: '25', th: '890' },
+    platform: 'TikTok',
+    affiliateLink: 'https://shop.tiktok.com/',
+    imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&q=80&w=400',
+    isTrending: true,
+    rating: 4.9,
+    reviews: 3500
+  },
+  {
+    id: "prod-003",
+    title: { en: 'Minimalist Canvas Sneakers', th: 'รองเท้าผ้าใบสไตล์เกาหลี มินิมอล' },
+    description: { en: 'Comfortable everyday wear, fits all styles, ready to ship.', th: 'ทรงสวย แมทช์ได้ทุกลุค พื้นนุ่มเดินสบายทั้งวัน พร้อมส่ง' },
+    price: { en: '10', th: '350' },
+    platform: 'Lazada',
+    affiliateLink: 'https://www.lazada.co.th/',
+    imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=400',
+    isTrending: false,
+    rating: 4.5,
+    reviews: 850
+  }
+];
+
+export default function MarketProUltimateApp() {
+  const [lang, setLang] = useState('th');
+  
+  // 💾 ระบบ LocalStorage: ดึงข้อมูลจากเครื่องผู้ใช้ ถ้าไม่มีให้ใช้ defaultProducts
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem('marketpro-products');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { return defaultProducts; }
+    }
+    return defaultProducts;
+  });
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('default');
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  
+  const [newProduct, setNewProduct] = useState({
+    title: '', description: '', price: '', platform: 'Shopee', affiliateLink: '', imageUrl: ''
+  });
+
+  const t = (key) => translations[lang][key] || translations['en'][key] || key;
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
+  // 💾 อัปเดต LocalStorage ทุกครั้งที่ products เปลี่ยนแปลง
+  useEffect(() => {
+    localStorage.setItem('marketpro-products', JSON.stringify(products));
+  }, [products]);
+
+  // SEO Schema
+  useEffect(() => {
+    document.title = `Market Pro | ${t('heroTitle')}`;
+    const productSchemas = products.map(p => ({
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": p.title[lang] || p.title.en,
+      "image": p.imageUrl,
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": lang === 'th' ? 'THB' : 'USD',
+        "price": p.price[lang] || p.price.en,
+        "availability": "https://schema.org/InStock"
+      }
+    }));
+    let scriptEl = document.getElementById('seo-schema-markup');
+    if (!scriptEl) {
+      scriptEl = document.createElement('script');
+      scriptEl.id = 'seo-schema-markup';
+      scriptEl.type = 'application/ld+json';
+      document.head.appendChild(scriptEl);
+    }
+    scriptEl.text = JSON.stringify(productSchemas);
+  }, [lang, products]);
+
+  // ฟังก์ชันเพิ่มสินค้า
+  const handleAddProduct = (e) => {
+    e.preventDefault();
+    if (!newProduct.title || !newProduct.affiliateLink) return;
+    
+    const productToAdd = {
+      id: `prod-${Date.now()}`,
+      title: { en: newProduct.title, th: newProduct.title },
+      description: { en: newProduct.description, th: newProduct.description },
+      price: { en: newProduct.price, th: newProduct.price },
+      platform: newProduct.platform,
+      affiliateLink: newProduct.affiliateLink,
+      imageUrl: newProduct.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=400',
+      rating: 5.0,
+      reviews: Math.floor(Math.random() * 500) + 10
+    };
+    
+    setProducts([productToAdd, ...products]);
+    setNewProduct({ title: '', description: '', price: '', platform: 'Shopee', affiliateLink: '', imageUrl: '' });
+    setShowAdmin(false);
+    showToast(t('addSuccess'));
+  };
+
+  // ฟังก์ชันสมัครรับข่าวสาร
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if(emailInput) {
+      showToast(t('subSuccess'));
+      setEmailInput('');
+    }
+  };
+
+  // 🗂️ ระบบกรองและจัดเรียงสินค้า
+  const processedProducts = [...products]
+    .filter(product => {
+      const pTitle = product.title[lang] || product.title.en;
+      return pTitle.toLowerCase().includes(searchQuery.toLowerCase());
+    })
+    .sort((a, b) => {
+      if (sortBy === 'priceLow') {
+        return Number(a.price[lang] || a.price.en) - Number(b.price[lang] || b.price.en);
+      }
+      if (sortBy === 'priceHigh') {
+        return Number(b.price[lang] || b.price.en) - Number(a.price[lang] || a.price.en);
+      }
+      if (sortBy === 'popular') {
+        return b.reviews - a.reviews;
+      }
+      return 0; // default (ล่าสุดที่เพิ่ม)
+    });
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-5 right-5 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-fade-in-down border border-slate-700">
+          <CheckCircle size={20} className="text-emerald-400" />
+          <span className="font-medium">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
+            <div className="bg-slate-900 text-white p-2 rounded-lg">
+              <Store size={22} strokeWidth={2.5} />
+            </div>
+            <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
+              Market <span className="text-blue-600">Pro</span>
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative group flex items-center bg-slate-100 rounded-lg p-1.5 border border-slate-200">
+              <Globe size={18} className="text-slate-600 ml-1" />
+              <select value={lang} onChange={(e) => setLang(e.target.value)} className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer outline-none px-2 py-1">
+                <option value="th">🇹🇭 TH</option>
+                <option value="en">🇺🇸 EN</option>
+              </select>
+            </div>
+            <button onClick={() => setShowAdmin(!showAdmin)} className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-900 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
+              <Settings size={16} />
+              <span className="hidden sm:inline">{t('adminPanel')}</span>
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Admin Panel */}
+      {showAdmin && (
+        <section className="max-w-4xl mx-auto mt-6 px-4 animate-fade-in-down">
+          <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+                <Plus size={24} className="text-blue-600" /> {t('addLink')}
+              </h2>
+              <button onClick={() => setShowAdmin(false)} className="p-2 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-sm font-bold text-slate-700">{t('prodName')}</label>
+                <input type="text" required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700">{t('price')}</label>
+                <input type="text" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} />
+              </div>
+              <div className="md:col-span-3 space-y-1">
+                <label className="text-sm font-bold text-slate-700">{t('description')}</label>
+                <textarea rows="2" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700">Platform *</label>
+                <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={newProduct.platform} onChange={e => setNewProduct({...newProduct, platform: e.target.value})}>
+                  <option value="Shopee">Shopee</option>
+                  <option value="Lazada">Lazada</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="Amazon">Amazon</option>
+                </select>
+              </div>
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-sm font-bold text-slate-700">{t('imgUrl')}</label>
+                <input type="url" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={newProduct.imageUrl} onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})} />
+              </div>
+              <div className="md:col-span-3 space-y-1">
+                <label className="text-sm font-bold text-slate-700">{t('affLink')}</label>
+                <input type="url" required className="w-full px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={newProduct.affiliateLink} onChange={e => setNewProduct({...newProduct, affiliateLink: e.target.value})} />
+              </div>
+              <div className="md:col-span-3 pt-2">
+                <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg">
+                  {t('createPost')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      )}
+
+      <main>
+        {/* Hero Section */}
+        <section className="bg-slate-900 text-white py-14 px-4 mb-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight">{t('heroTitle')}</h1>
+            <p className="text-slate-300 mb-8 max-w-2xl mx-auto text-lg">{t('heroDesc')}</p>
+            
+            <div className="relative max-w-2xl mx-auto">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Search className="text-slate-400" size={24} />
+              </div>
+              <input
+                type="search"
+                className="w-full pl-14 pr-6 py-4 rounded-full bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/50 transition-all text-lg"
+                placeholder={t('searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Toolbar & Sort */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-end">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+            <ArrowUpDown size={16} className="text-slate-500" />
+            <span className="text-sm font-bold text-slate-700 hidden sm:inline">{t('sortBy')}</span>
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-transparent text-sm font-medium text-slate-600 focus:outline-none cursor-pointer"
+            >
+              <option value="default">{t('sortDefault')}</option>
+              <option value="popular">{t('sortPopular')}</option>
+              <option value="priceLow">{t('sortPriceLow')}</option>
+              <option value="priceHigh">{t('sortPriceHigh')}</option>
+            </select>
+          </div>
+        </section>
+
+        {/* Product Listing */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {processedProducts.map((product) => {
+              const pTitle = product.title[lang] || product.title.en;
+              const pDesc = product.description[lang] || product.description.en;
+              const pPrice = product.price[lang] || product.price.en;
+
+              return (
+                <article key={product.id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 flex flex-col group relative">
+                  <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                    {product.isFlashSale && <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500 text-white shadow-md flex items-center gap-1"><Clock size={12} /> {t('flashSale')}</span>}
+                    {product.isTrending && <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-orange-500 text-white shadow-md flex items-center gap-1"><Flame size={12} /> {t('trending')}</span>}
+                  </div>
+                  <figure className="relative aspect-square overflow-hidden bg-slate-50 border-b border-slate-100 m-0">
+                    <img src={product.imageUrl} alt={pTitle} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  </figure>
+                  <div className="p-5 flex flex-col flex-grow">
+                    <h3 className="font-bold text-slate-800 line-clamp-2 leading-snug mb-2 text-lg">{pTitle}</h3>
+                    <p className="text-sm text-slate-500 line-clamp-2 mb-5 flex-grow">{pDesc}</p>
+                    <div className="flex items-end justify-between mb-5">
+                      <p className="font-black text-2xl text-blue-700 tracking-tight">{t('currency')}{pPrice}</p>
+                      <div className="flex text-amber-400">
+                        <Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" />
+                      </div>
+                    </div>
+                    <a href={product.affiliateLink} target="_blank" rel="sponsored noopener noreferrer" className="w-full flex items-center justify-center gap-2 text-white font-bold py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 transition-all shadow-md">
+                      <ShoppingCart size={18} /> {t('buyNow')}
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 💌 Newsletter Section (Lead Generation) */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-3xl p-8 md:p-12 text-center text-white shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <Mail size={48} className="mx-auto mb-6 text-blue-200" />
+              <h2 className="text-3xl font-black mb-4">{t('newsletterTitle')}</h2>
+              <p className="text-blue-100 mb-8 text-lg">{t('newsletterDesc')}</p>
+              
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 justify-center">
+                <input 
+                  type="email" required
+                  pla
